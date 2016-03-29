@@ -1,2 +1,2 @@
 # article-research
-A simple scala / sbt program to search for articles online
+A simple scala / play program to search for articles online
