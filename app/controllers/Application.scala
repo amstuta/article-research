@@ -26,10 +26,9 @@ object Application extends Controller {
 
     result match {
       case Some(s) => {
-        s foreach println
-        Ok("Success")
+        Ok(views.html.articleview(s))
       }
-      case None => Ok("Fail")
+      case None => Ok("Failed")
     }
   }
 }

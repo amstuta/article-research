@@ -8,8 +8,20 @@ private[api] trait ApiCall {
   protected val length = "20"
   protected val language = "en"
   protected val format = "json"
+  protected val keyfile = "conf/apikey.txt"
+  protected val key = loadKey
 
   def search(keyword: String): Option[Array[Article]]
+
+  protected def loadKey: String = {
+    import scala.io.Source
+
+    val source = Source.fromFile(keyfile)
+
+    try source.mkString
+    catch { case _ => null }
+    finally source.close()
+  }
 
   protected def parse(src: String): Option[Array[Article]] = {
     import play.api.libs.json._
@@ -35,21 +47,14 @@ private[api] trait ApiCall {
 object FarooApi extends ApiCall {
 
   private val url = "http://www.faroo.com/api"
-  private val key = ""
 
   override def search(keyword: String): Option[Array[Article]] = {
     import scalaj.http.Http
 
-    val response = Http(url)
-      .param("q", keyword)
-      .param("start", "1")
-      .param("length", length)
-      .param("l", language)
-      .param("src", "web")
-      .param("i", "false")
-      .param("f", format)
-      .param("key", key)
-      .asString
+    if (key == null) return None
+
+    val request = s"$url?key=$key&q=$keyword&start=1&l=$language&length=$length&src=web&i=false&f=json"
+    val response = Http(request).asString
 
     if (response.code != 200) {
       println(response.code)

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt-get install cassandra
 sudo service cassandra start
 
