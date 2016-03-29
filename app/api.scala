@@ -11,7 +11,24 @@ private[api] trait ApiCall {
 
   def search(keyword: String): Option[Array[Article]]
 
-  protected def parse(src: String): Option[Array[Article]]
+  protected def parse(src: String): Option[Array[Article]] = {
+    import play.api.libs.json._
+
+    val js = Json parse src
+    val articles = (js \ "results").as[Array[JsValue]]
+
+    try {
+      Option(for (article <- articles)
+      yield new Article(
+        (article \ "url").as[String],
+        (article \ "title").as[String],
+        (article \ "author").as[String],
+        (article \ "date").as[Long],
+        (article \ "content").as[String])
+      )
+    }
+    catch { case e: Exception => None }
+  }
 }
 
 
@@ -39,24 +56,5 @@ object FarooApi extends ApiCall {
       return None
     }
     parse(response.body)
-  }
-
-  override def parse(src: String): Option[Array[Article]] = {
-    import play.api.libs.json._
-
-    val js = Json parse src
-    val articles = (js \ "results").as[Array[JsValue]]
-
-    try {
-      Option(for (article <- articles)
-      yield new Article(
-        (article \ "url").as[String],
-        (article \ "title").as[String],
-        (article \ "author").as[String],
-        (article \ "date").as[Long],
-        (article \ "content").as[String])
-      )
-    }
-    catch { case e: Exception => None }
   }
 }
